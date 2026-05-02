@@ -11,7 +11,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([getEnrollments(), getProgress()])
+    if (!user?.id) return;
+    Promise.all([getEnrollments(), getProgress(user.id)])
       .then(([enrollRes, progressRes]) => {
         setEnrollments(enrollRes.data.data)
         setProgress(progressRes.data.data)
@@ -22,6 +23,14 @@ function Dashboard() {
 
   const completed = progress.filter(p => p.status === 'completed').length
   const inProgress = progress.filter(p => p.status === 'in_progress').length
+
+  function isCourseCompleted(course) {
+    if (!course?.modules || course.modules.length === 0) return false;
+    const completedModules = progress.filter(p => 
+      p.status === 'completed' && course.modules.some(m => m.id === p.module?.id || m.documentId === p.module?.documentId)
+    );
+    return completedModules.length === course.modules.length;
+  }
 
   if (loading) return <Spinner />
 
@@ -70,19 +79,22 @@ function Dashboard() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {enrollments.map(enrollment => (
-              <div key={enrollment.id} className="bg-base-200 rounded-2xl p-6 flex justify-between items-center">
-                <div>
-                  <h3 className="font-bold text-lg">{enrollment.course?.title}</h3>
-                  <span className={`badge badge-sm ${enrollment.status === 'active' ? 'badge-success' : 'badge-ghost'}`}>
-                    {enrollment.status}
-                  </span>
+            {enrollments.map(enrollment => {
+              const completed = isCourseCompleted(enrollment.course)
+              return (
+                <div key={enrollment.id} className="bg-base-200 rounded-2xl p-6 flex justify-between items-center">
+                  <div>
+                    <h3 className="font-bold text-lg">{enrollment.course?.title}</h3>
+                    <span className={`badge badge-sm mt-1 ${completed ? 'badge-success text-success-content' : 'badge-primary text-primary-content'}`}>
+                      {completed ? 'Completed' : 'In Progress'}
+                    </span>
+                  </div>
+                  <Link to={`/courses/${enrollment.course?.documentId}`} className={`btn btn-sm ${completed ? 'btn-outline btn-success' : 'btn-primary'}`}>
+                    {completed ? 'Review Course' : 'Continue'}
+                  </Link>
                 </div>
-                <Link to={`/courses/${enrollment.course?.documentId}`} className="btn btn-primary btn-sm">
-                  Continue
-                </Link>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

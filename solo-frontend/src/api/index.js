@@ -23,7 +23,7 @@ export const getLeaderboard = () => API.get('/leaderboard')
 export const getCourses = () => API.get('/courses?populate=*')
 
 // Enrollments
-export const getEnrollments = () => API.get('/enrollments')
+export const getEnrollments = () => API.get('/enrollments?populate[course][populate]=modules')
 export const enrollCourse = (courseDocumentId) =>
   API.post('/enrollments', { data: { course: courseDocumentId } })
 
