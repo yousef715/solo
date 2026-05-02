@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import html2canvas from 'html2canvas'
+import { toPng } from 'html-to-image'
+import download from 'downloadjs'
 import { jsPDF } from 'jspdf'
 import { getCourses } from '../api'
 import { useAuth } from '../context/AuthContext'
@@ -28,17 +29,14 @@ function CertificateView() {
   const handleDownload = () => {
     setDownloading(true)
     if (certRef.current) {
-      html2canvas(certRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
-        .then(canvas => {
-          const link = document.createElement('a');
-          link.download = `${course.title}_Certificate.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
+      toPng(certRef.current, { cacheBust: true, pixelRatio: 2 })
+        .then((dataUrl) => {
+          download(dataUrl, `${course.title}_Certificate.png`);
           setDownloading(false);
         })
-        .catch(err => {
-          console.error('Canvas error:', err)
-          setDownloading(false)
+        .catch((err) => {
+          console.error('Image capture error:', err);
+          setDownloading(false);
         });
     }
   }
@@ -46,17 +44,16 @@ function CertificateView() {
   const handleDownloadPDF = () => {
     setDownloading(true)
     if (certRef.current) {
-      html2canvas(certRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
-        .then(canvas => {
-          const imgData = canvas.toDataURL('image/png');
+      toPng(certRef.current, { cacheBust: true, pixelRatio: 2 })
+        .then((dataUrl) => {
           const pdf = new jsPDF('landscape', 'px', [900, 650]);
-          pdf.addImage(imgData, 'PNG', 0, 0, 900, 650);
+          pdf.addImage(dataUrl, 'PNG', 0, 0, 900, 650);
           pdf.save(`${course.title}_Certificate.pdf`);
           setDownloading(false);
         })
-        .catch(err => {
-          console.error('Canvas error:', err)
-          setDownloading(false)
+        .catch((err) => {
+          console.error('Image capture error:', err);
+          setDownloading(false);
         });
     }
   }
