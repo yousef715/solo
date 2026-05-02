@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import remarkGfm from 'remark-gfm'
+import ReactPlayer from 'react-player/lazy'
 import { getCourses, enrollCourse, getProgress, createProgress, updateProgress, getEnrollments, updateUserXP } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
@@ -13,6 +17,7 @@ function CourseDetails() {
   const [message, setMessage] = useState('')
   const [progress, setProgress] = useState([])
   const [isEnrolled, setIsEnrolled] = useState(false)
+  const [activeModule, setActiveModule] = useState(null)
 
   useEffect(() => {
     getCourses()
@@ -118,43 +123,103 @@ function CourseDetails() {
           <div className="flex flex-col gap-3">
             {course.modules.map((mod, index) => {
               const status = getModuleStatus(mod)
+              const isActive = activeModule === mod.id
+
               return (
-                <div key={mod.id} className="bg-base-200 rounded-xl p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${status === 'completed' ? 'bg-success text-success-content' : 'bg-primary text-primary-content'}`}>
-                      {status === 'completed' ? '✓' : index + 1}
+                <div key={mod.id} className="bg-base-200 rounded-xl overflow-hidden shadow-sm">
+                  {/* Module Header / Accordion Toggle */}
+                  <div 
+                    className="p-4 flex items-center justify-between cursor-pointer hover:bg-base-300 transition-colors"
+                    onClick={() => {
+                      // Only allow opening if enrolled
+                      if (isEnrolled && user) {
+                        setActiveModule(isActive ? null : mod.id)
+                      } else {
+                        setMessage("Please enroll in the course to view module content. 🔒")
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${status === 'completed' ? 'bg-success text-success-content' : 'bg-primary text-primary-content'}`}>
+                        {status === 'completed' ? '✓' : index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium">{mod.title}</p>
+                        <span className="badge badge-sm badge-ghost">{mod.content_type}</span>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{mod.title}</p>
-                      <span className="badge badge-sm badge-ghost">{mod.content_type}</span>
+                    
+                    <div className="flex gap-2 items-center">
+                      {user && isEnrolled && (
+                        <div className="flex gap-2 mr-4" onClick={(e) => e.stopPropagation()}>
+                          {!status && (
+                            <button
+                              onClick={() => {
+                                handleStart(mod);
+                                setActiveModule(mod.id); // Auto open when starting
+                              }}
+                              className="btn btn-sm btn-primary"
+                            >
+                              Start Lesson
+                            </button>
+                          )}
+                          {status === 'in_progress' && (
+                            <button
+                              onClick={() => handleFinish(mod)}
+                              className="btn btn-sm btn-warning"
+                            >
+                              Finish Lesson
+                            </button>
+                          )}
+                          {status === 'completed' && (
+                            <button
+                              disabled
+                              className="btn btn-sm btn-success"
+                            >
+                              Completed ✓
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      
+                      {isEnrolled && user && (
+                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transform transition-transform ${isActive ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      )}
                     </div>
                   </div>
-                  {user && isEnrolled && (
-                    <div className="flex gap-2">
-                      {!status && (
-                        <button
-                          onClick={() => handleStart(mod)}
-                          className="btn btn-sm btn-primary"
+
+                  {/* Expanded Content View */}
+                  {isActive && mod.content && (
+                    <div className="p-6 bg-base-100 border-t border-base-300">
+                      <div className="prose prose-sm md:prose-base max-w-none prose-headings:text-primary prose-a:text-primary">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            a: ({ node, ...props }) => {
+                              const href = props.href || '';
+                              // Automatically convert video URLs to embedded players
+                              if (href.includes('youtube.com') || href.includes('youtu.be') || href.includes('vimeo.com')) {
+                                return (
+                                  <div className="my-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
+                                    <ReactPlayer url={href} width="100%" height="100%" controls />
+                                  </div>
+                                );
+                              }
+                              return <a {...props} className="hover:underline" target="_blank" rel="noopener noreferrer">{props.children}</a>;
+                            }
+                          }}
                         >
-                          Start Lesson
-                        </button>
-                      )}
-                      {status === 'in_progress' && (
-                        <button
-                          onClick={() => handleFinish(mod)}
-                          className="btn btn-sm btn-warning"
-                        >
-                          Finish Lesson
-                        </button>
-                      )}
-                      {status === 'completed' && (
-                        <button
-                          disabled
-                          className="btn btn-sm btn-success"
-                        >
-                          Completed ✓
-                        </button>
-                      )}
+                          {mod.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+                  {isActive && !mod.content && (
+                    <div className="p-6 bg-base-100 border-t border-base-300 text-center text-base-content/60">
+                      No content has been added to this module yet.
                     </div>
                   )}
                 </div>
