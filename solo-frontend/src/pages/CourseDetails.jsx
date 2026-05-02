@@ -130,11 +130,13 @@ function CourseDetails() {
                   <div 
                     className="p-4 flex items-center justify-between cursor-pointer hover:bg-base-300 transition-colors"
                     onClick={() => {
-                      // Only allow opening if enrolled
-                      if (isEnrolled && user) {
-                        setActiveModule(isActive ? null : mod.id)
-                      } else {
+                      // Only allow opening if enrolled and started
+                      if (!isEnrolled || !user) {
                         setMessage("Please enroll in the course to view module content. 🔒")
+                      } else if (!status) {
+                        setMessage("You must click 'Start Lesson' to view the content. 🎬")
+                      } else {
+                        setActiveModule(isActive ? null : mod.id)
                       }
                     }}
                   >
