@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import html2canvas from 'html2canvas'
+import Certificate from '../components/Certificate'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { getEnrollments, getProgress, getCourses } from '../api'
@@ -10,6 +12,9 @@ function Dashboard() {
   const [progress, setProgress] = useState([])
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
+  const certRef = useRef(null)
+  const [certData, setCertData] = useState({ studentName: '', courseName: '', date: '' })
+  const [downloadingId, setDownloadingId] = useState(null)
 
   useEffect(() => {
     if (!user?.id) return;
@@ -33,6 +38,31 @@ function Dashboard() {
       p.status === 'completed' && course.modules.some(m => m.id === p.module?.id || m.documentId === p.module?.documentId)
     );
     return completedModules.length === course.modules.length;
+  }
+
+  const handleDownloadCertificate = (course) => {
+    setDownloadingId(course.id)
+    setCertData({
+      studentName: user?.username || user?.email || 'Student',
+      courseName: course.title,
+      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    })
+    
+    // Wait for React to re-render the hidden component with new data
+    setTimeout(() => {
+      if (certRef.current) {
+        html2canvas(certRef.current, { scale: 2 }).then(canvas => {
+          const link = document.createElement('a');
+          link.download = `${course.title}_Certificate.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          setDownloadingId(null);
+        }).catch(err => {
+          console.error('Canvas error:', err)
+          setDownloadingId(null)
+        });
+      }
+    }, 500);
   }
 
   if (loading) return <Spinner />
@@ -92,9 +122,20 @@ function Dashboard() {
                       {completed ? 'Completed' : 'In Progress'}
                     </span>
                   </div>
-                  <Link to={`/courses/${enrollment.course?.documentId}`} className={`btn btn-sm ${completed ? 'btn-outline btn-success' : 'btn-primary'}`}>
-                    {completed ? 'Review Course' : 'Continue'}
-                  </Link>
+                  <div className="flex gap-2">
+                    {completed && (
+                      <button 
+                        onClick={() => handleDownloadCertificate(enrollment.course)}
+                        disabled={downloadingId === enrollment.course?.id}
+                        className="btn btn-sm btn-outline btn-warning"
+                      >
+                        {downloadingId === enrollment.course?.id ? <span className="loading loading-spinner loading-xs"></span> : 'Download Certificate 🎓'}
+                      </button>
+                    )}
+                    <Link to={`/courses/${enrollment.course?.documentId}`} className={`btn btn-sm ${completed ? 'btn-outline btn-success' : 'btn-primary'}`}>
+                      {completed ? 'Review Course' : 'Continue'}
+                    </Link>
+                  </div>
                 </div>
               )
             })}
@@ -117,6 +158,17 @@ function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Hidden Certificate Component for html2canvas */}
+      <div className="overflow-hidden h-0 w-0">
+        <Certificate 
+          ref={certRef}
+          studentName={certData.studentName}
+          courseName={certData.courseName}
+          date={certData.date}
+        />
+      </div>
+
     </div>
   )
 }
