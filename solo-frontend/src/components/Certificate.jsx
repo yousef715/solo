@@ -4,7 +4,7 @@ const Certificate = forwardRef(({ studentName, courseName, date }, ref) => {
   return (
     <div
       ref={ref}
-      className="bg-white text-gray-800 p-12 w-[900px] h-[650px] relative font-serif mx-auto"
+      className="bg-white text-gray-800 p-12 w-[900px] h-[650px] relative font-serif"
     >
       {/* Decorative Borders */}
       <div className="absolute inset-4 border-8 border-double border-gray-300 pointer-events-none"></div>

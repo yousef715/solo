@@ -81,8 +81,8 @@ function CertificateView() {
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
   return (
-    <div className="min-h-screen bg-base-200 flex flex-col items-center py-10 px-4">
-      <div className="mb-8 flex gap-4">
+    <div className="min-h-screen bg-base-200 flex flex-col items-center py-10 px-4 overflow-x-hidden">
+      <div className="mb-8 flex flex-wrap justify-center gap-3 w-full max-w-lg">
         <Link to="/dashboard" className="btn btn-outline">← Back to Dashboard</Link>
         <button 
           onClick={handleDownload} 
