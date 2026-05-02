@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getEnrollments, getProgress } from '../api'
+import { getEnrollments, getProgress, getCourses } from '../api'
 import Spinner from '../components/Spinner'
 
 function Dashboard() {
   const { user, logout } = useAuth()
   const [enrollments, setEnrollments] = useState([])
   const [progress, setProgress] = useState([])
+  const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!user?.id) return;
-    Promise.all([getEnrollments(), getProgress(user.id)])
-      .then(([enrollRes, progressRes]) => {
+    Promise.all([getEnrollments(), getProgress(user.id), getCourses()])
+      .then(([enrollRes, progressRes, coursesRes]) => {
         setEnrollments(enrollRes.data.data)
         setProgress(progressRes.data.data)
+        setCourses(coursesRes.data.data)
       })
       .catch(err => console.error(err))
       .finally(() => setLoading(false))
@@ -24,7 +26,8 @@ function Dashboard() {
   const completed = progress.filter(p => p.status === 'completed').length
   const inProgress = progress.filter(p => p.status === 'in_progress').length
 
-  function isCourseCompleted(course) {
+  function isCourseCompleted(enrollmentCourse) {
+    const course = courses.find(c => c.id === enrollmentCourse?.id || c.documentId === enrollmentCourse?.documentId);
     if (!course?.modules || course.modules.length === 0) return false;
     const completedModules = progress.filter(p => 
       p.status === 'completed' && course.modules.some(m => m.id === p.module?.id || m.documentId === p.module?.documentId)
