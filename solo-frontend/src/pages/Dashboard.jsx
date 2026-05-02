@@ -160,7 +160,7 @@ function Dashboard() {
       </div>
 
       {/* Hidden Certificate Component for html2canvas */}
-      <div className="overflow-hidden h-0 w-0">
+      <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>
         <Certificate 
           ref={certRef}
           studentName={certData.studentName}
