@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import html2canvas from 'html2canvas'
+import { toPng } from 'html-to-image'
+import download from 'downloadjs'
 import Certificate from '../components/Certificate'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -51,16 +52,15 @@ function Dashboard() {
     // Wait for React to re-render the hidden component with new data
     setTimeout(() => {
       if (certRef.current) {
-        html2canvas(certRef.current, { scale: 2 }).then(canvas => {
-          const link = document.createElement('a');
-          link.download = `${course.title}_Certificate.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          setDownloadingId(null);
-        }).catch(err => {
-          console.error('Canvas error:', err)
-          setDownloadingId(null)
-        });
+        toPng(certRef.current, { cacheBust: true, pixelRatio: 2 })
+          .then((dataUrl) => {
+            download(dataUrl, `${course.title}_Certificate.png`);
+            setDownloadingId(null);
+          })
+          .catch((err) => {
+            console.error('Image capture error:', err);
+            setDownloadingId(null);
+          });
       }
     }, 500);
   }
@@ -159,8 +159,8 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Hidden Certificate Component for html2canvas */}
-      <div style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>
+      {/* Hidden Certificate Component for html-to-image */}
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
         <Certificate 
           ref={certRef}
           studentName={certData.studentName}
