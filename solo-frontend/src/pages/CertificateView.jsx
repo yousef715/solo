@@ -14,7 +14,23 @@ function CertificateView() {
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState(false)
+  const [scale, setScale] = useState(1)
   const certRef = useRef(null)
+
+  useEffect(() => {
+    const handleResize = () => {
+      // 900px is the certificate width, plus 32px for padding
+      const availableWidth = window.innerWidth - 32;
+      if (availableWidth < 900) {
+        setScale(availableWidth / 900);
+      } else {
+        setScale(1);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     getCourses()
@@ -84,9 +100,12 @@ function CertificateView() {
         </button>
       </div>
 
-      <div className="overflow-auto max-w-full shadow-2xl bg-white rounded-lg">
+      <div 
+        className="shadow-2xl bg-white rounded-lg overflow-hidden flex-shrink-0"
+        style={{ width: `${900 * scale}px`, height: `${650 * scale}px` }}
+      >
         {/* We keep Certificate in its exact pixel dimensions to ensure high quality */}
-        <div style={{ width: '900px', height: '650px', transformOrigin: 'top left' }} className="sm:scale-100 scale-75 md:scale-100 origin-top-left">
+        <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: '900px', height: '650px' }}>
           <Certificate 
             ref={certRef}
             studentName={studentName}
