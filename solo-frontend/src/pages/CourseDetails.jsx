@@ -196,7 +196,18 @@ function CourseDetails() {
                       {/* Explicit Video Field */}
                       {mod.video_url && (
                         <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
-                          <ReactPlayer url={mod.video_url} width="100%" height="100%" controls />
+                          <ReactPlayer 
+                            url={
+                              mod.video_url
+                                .replace(/\[.*?\]\((.*?)\)/, '$1') // remove markdown [text](link)
+                                .replace(/<a.*?href="(.*?)".*?>.*?<\/a>/, '$1') // remove html <a href="link">
+                                .replace(/^['"]|['"]$/g, '') // remove quotes
+                                .trim()
+                            } 
+                            width="100%" 
+                            height="100%" 
+                            controls 
+                          />
                         </div>
                       )}
 
