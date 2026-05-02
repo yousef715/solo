@@ -20,6 +20,9 @@
       "enum": ["video", "text", "interactive"],
       "required": true
     },
+    "video_url": {
+      "type": "string"
+    },
     "content": {
       "type": "richtext"
     },

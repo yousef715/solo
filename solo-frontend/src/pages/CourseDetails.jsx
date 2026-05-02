@@ -191,35 +191,29 @@ function CourseDetails() {
                   </div>
 
                   {/* Expanded Content View */}
-                  {isActive && mod.content && (
+                  {isActive && (
                     <div className="p-6 bg-base-100 border-t border-base-300">
-                      <div className="prose prose-sm md:prose-base max-w-none prose-headings:text-primary prose-a:text-primary">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeRaw]}
-                          components={{
-                            a: ({ node, ...props }) => {
-                              const href = props.href || '';
-                              // Automatically convert video URLs to embedded players
-                              if (href.includes('youtube.com') || href.includes('youtu.be') || href.includes('vimeo.com')) {
-                                return (
-                                  <div className="my-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
-                                    <ReactPlayer url={href} width="100%" height="100%" controls />
-                                  </div>
-                                );
-                              }
-                              return <a {...props} className="hover:underline" target="_blank" rel="noopener noreferrer">{props.children}</a>;
-                            }
-                          }}
-                        >
-                          {mod.content}
-                        </ReactMarkdown>
-                      </div>
-                    </div>
-                  )}
-                  {isActive && !mod.content && (
-                    <div className="p-6 bg-base-100 border-t border-base-300 text-center text-base-content/60">
-                      No content has been added to this module yet.
+                      {/* Explicit Video Field */}
+                      {mod.video_url && (
+                        <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
+                          <ReactPlayer url={mod.video_url} width="100%" height="100%" controls />
+                        </div>
+                      )}
+
+                      {/* Rich Text Content */}
+                      {mod.content ? (
+                        <div className="prose prose-sm md:prose-base max-w-none prose-headings:text-primary prose-a:text-primary">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                            {mod.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        !mod.video_url && (
+                          <div className="text-center text-base-content/60 py-4">
+                            No content has been added to this module yet.
+                          </div>
+                        )
+                      )}
                     </div>
                   )}
                 </div>
