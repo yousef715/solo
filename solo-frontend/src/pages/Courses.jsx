@@ -39,7 +39,7 @@ function Courses() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <div className="flex flex-wrap gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-2 w-full flex-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {categories.map(cat => (
             <button
               key={cat}
