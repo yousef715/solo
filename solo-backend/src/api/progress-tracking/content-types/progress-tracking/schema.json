@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "progress_trackings",
+  "info": {
+    "singularName": "progress-tracking",
+    "pluralName": "progress-trackings",
+    "displayName": "Progress Tracking"
+  },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "status": { "type": "string" },
+    "score": { "type": "integer" },
+    "time_spent": { "type": "integer" },
+    "user": { "type": "relation", "relation": "manyToOne", "target": "plugin::users-permissions.user" },
+    "module": { "type": "relation", "relation": "manyToOne", "target": "api::module.module" }
+  }
+}

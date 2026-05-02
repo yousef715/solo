@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "modules",
+  "info": {
+    "singularName": "module",
+    "pluralName": "modules",
+    "displayName": "Module",
+    "description": "Learning blocks for courses"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "content_type": {
+      "type": "enumeration",
+      "enum": ["video", "text", "interactive"],
+      "required": true
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "course": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::course.course",
+      "inversedBy": "modules"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+[2026-04-30 15:10:32.568] info: [export] Diagnostic log file: /home/flashhack/Coding/solo/solo-backend/export_1777551032565.log (info-level messages are written here even without --verbose)
+[2026-04-30 15:10:32.568] info: [file-destination-provider] creating gzip
+
+[2026-04-30 15:10:32.569] info: [local-source-provider] getting metadata
+
+[2026-04-30 15:10:32.570] info: [local-source-provider] getting metadata
+
+[2026-04-30 15:10:32.570] info: [local-source-provider] getting schemas
+
+[2026-04-30 15:10:32.574] info: [local-source-provider] getting schemas
+
+[2026-04-30 15:10:32.575] info: [file-destination-provider] creating schemas write stream
+
+[2026-04-30 15:10:32.588] info: [local-source-provider] creating entities read stream
+
+[2026-04-30 15:10:32.588] info: [file-destination-provider] creating entities write stream
+
+[2026-04-30 15:10:32.632] info: [local-source-provider] creating assets read stream
+
+[2026-04-30 15:10:32.633] info: [file-destination-provider] creating assets write stream
+
+[2026-04-30 15:10:32.637] info: [local-source-provider] creating links read stream
+
+[2026-04-30 15:10:32.637] info: [file-destination-provider] creating links write stream
+
+[2026-04-30 15:10:32.687] info: [local-source-provider] creating configuration read stream
+
+[2026-04-30 15:10:32.688] info: [file-destination-provider] creating configuration write stream
+
+[2026-04-30 15:10:32.697] info: [file-destination-provider] writing metadata
+
