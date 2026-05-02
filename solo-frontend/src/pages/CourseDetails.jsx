@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
-import ReactPlayer from 'react-player'
 import { getCourses, enrollCourse, getProgress, createProgress, updateProgress, getEnrollments, updateUserXP } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
@@ -194,22 +193,34 @@ function CourseDetails() {
                   {isActive && (
                     <div className="p-6 bg-base-100 border-t border-base-300">
                       {/* Explicit Video Field */}
-                      {mod.video_url && (
-                        <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
-                          <ReactPlayer 
-                            url={
-                              mod.video_url
-                                .replace(/\[.*?\]\((.*?)\)/, '$1') // remove markdown [text](link)
-                                .replace(/<a.*?href="(.*?)".*?>.*?<\/a>/, '$1') // remove html <a href="link">
-                                .replace(/^['"]|['"]$/g, '') // remove quotes
-                                .trim()
-                            } 
-                            width="100%" 
-                            height="100%" 
-                            controls 
-                          />
-                        </div>
-                      )}
+                      {mod.video_url && (() => {
+                        // Extract clean URL
+                        let url = mod.video_url.replace(/\[.*?\]\((.*?)\)/, '$1').replace(/<a.*?href="(.*?)".*?>.*?<\/a>/, '$1').replace(/^['"]|['"]$/g, '').trim();
+                        
+                        // Extract YouTube ID
+                        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+                        const embedUrl = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : null;
+
+                        return embedUrl ? (
+                          <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
+                            <iframe 
+                              width="100%" 
+                              height="100%" 
+                              src={embedUrl} 
+                              title="YouTube video player" 
+                              frameBorder="0" 
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                              allowFullScreen
+                              className="w-full h-full"
+                            ></iframe>
+                          </div>
+                        ) : (
+                          <div className="mb-6 alert alert-warning">
+                            <span>Unsupported video URL: </span>
+                            <a href={url} target="_blank" rel="noreferrer" className="underline font-bold text-primary">{url}</a>
+                          </div>
+                        );
+                      })()}
 
                       {/* Rich Text Content */}
                       {mod.content ? (
