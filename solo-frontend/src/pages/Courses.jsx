@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { getCourses } from '../api'
 import Spinner from '../components/Spinner'
 
-const categories = ['All', 'Software Engineering', 'Frontend', 'Backend', 'Design']
+
 
 function Courses() {
   const [courses, setCourses] = useState([])
@@ -23,6 +23,8 @@ function Courses() {
     const matchSearch = c.title.toLowerCase().includes(search.toLowerCase())
     return matchCategory && matchSearch
   })
+
+  const categories = ['All', ...new Set(courses.map(c => c.category).filter(Boolean))]
 
   if (loading) return <Spinner />
 
