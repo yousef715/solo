@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import CourseDetails from './pages/CourseDetails'
 import Dashboard from './pages/Dashboard'
 import Leaderboard from './pages/Leaderboard'
+import CertificateView from './pages/CertificateView'
 import NotFound from './pages/NotFound'
 
 
@@ -33,6 +34,11 @@ export default function App() {
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/certificate/:id" element={
+          <ProtectedRoute>
+            <CertificateView />
           </ProtectedRoute>
         } />
         <Route path="/leaderboard" element={
