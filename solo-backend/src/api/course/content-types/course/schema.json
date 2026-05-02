@@ -24,6 +24,9 @@
     "instructorName": {
       "type": "string"
     },
+    "price": {
+      "type": "decimal"
+    },
     "modules": {
       "type": "relation",
       "relation": "oneToMany",
