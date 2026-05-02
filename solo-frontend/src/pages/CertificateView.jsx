@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 import { getCourses } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Certificate from '../components/Certificate'
@@ -42,6 +43,24 @@ function CertificateView() {
     }
   }
 
+  const handleDownloadPDF = () => {
+    setDownloading(true)
+    if (certRef.current) {
+      html2canvas(certRef.current, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+        .then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jsPDF('landscape', 'px', [900, 650]);
+          pdf.addImage(imgData, 'PNG', 0, 0, 900, 650);
+          pdf.save(`${course.title}_Certificate.pdf`);
+          setDownloading(false);
+        })
+        .catch(err => {
+          console.error('Canvas error:', err)
+          setDownloading(false)
+        });
+    }
+  }
+
   if (loading) return <Spinner />
   if (!course) return <div className="p-10 text-center text-xl">Course not found!</div>
 
@@ -60,10 +79,11 @@ function CertificateView() {
           {downloading ? 'Generating Image...' : 'Download as PNG 📥'}
         </button>
         <button 
-          onClick={() => window.print()} 
+          onClick={handleDownloadPDF} 
+          disabled={downloading}
           className="btn btn-secondary"
         >
-          Print / Save PDF 🖨️
+          {downloading ? 'Generating PDF...' : 'Save as PDF 📄'}
         </button>
       </div>
 
