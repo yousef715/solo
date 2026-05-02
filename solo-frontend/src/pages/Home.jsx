@@ -67,7 +67,8 @@ function Home() {
                   <span className="badge badge-primary badge-sm w-fit">{course.category}</span>
                   <h2 className="card-title mt-1">{course.title}</h2>
                   <p className="text-sm text-base-content/60">By {course.instructorName || 'Unknown'}</p>
-                  <div className="card-actions justify-end mt-4">
+                  <div className="card-actions justify-between items-center mt-4">
+                    <span className="text-xl font-bold">{course.price ? `$${course.price}` : '$49'}</span>
                     <Link to={`/courses/${course.documentId}`} className="btn btn-primary btn-sm">
                       View Course
                     </Link>
