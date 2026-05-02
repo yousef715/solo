@@ -39,7 +39,7 @@ function Courses() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           {categories.map(cat => (
             <button
               key={cat}

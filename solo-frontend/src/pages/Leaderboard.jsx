@@ -51,11 +51,11 @@ function Leaderboard() {
                     <td className="text-primary font-bold">{u.xp || 0} XP</td>
                     <td>
                       {u.xp >= 100 ? (
-                        <span className="badge badge-success">Master 🎓</span>
+                        <span className="badge badge-success whitespace-nowrap py-3 px-4 font-bold">Master 🎓</span>
                       ) : u.xp >= 50 ? (
-                        <span className="badge badge-warning">Pro 🚀</span>
+                        <span className="badge badge-warning whitespace-nowrap py-3 px-4 font-bold">Pro 🚀</span>
                       ) : (
-                        <span className="badge badge-ghost">Beginner 🌱</span>
+                        <span className="badge badge-ghost whitespace-nowrap py-3 px-4 font-bold">Beginner 🌱</span>
                       )}
                     </td>
                   </tr>

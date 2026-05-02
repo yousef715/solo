@@ -87,14 +87,14 @@ function Dashboard() {
             {enrollments.map(enrollment => {
               const completed = isCourseCompleted(enrollment.course)
               return (
-                <div key={enrollment.id} className="bg-base-200 rounded-2xl p-6 flex justify-between items-center">
+                <div key={enrollment.id} className="bg-base-200 rounded-2xl p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <div>
                     <h3 className="font-bold text-lg">{enrollment.course?.title}</h3>
                     <span className={`badge badge-sm mt-1 ${completed ? 'badge-success text-success-content' : 'badge-primary text-primary-content'}`}>
                       {completed ? 'Completed' : 'In Progress'}
                     </span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2 mt-2 sm:mt-0">
                     {completed && (
                       <Link 
                         to={`/certificate/${enrollment.course?.documentId}`}
