@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { getCourses, enrollCourse, getProgress, createProgress, updateProgress, getEnrollments, updateUserXP } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
+import PaymentModal from '../components/PaymentModal'
 
 function CourseDetails() {
   const { id } = useParams()
@@ -17,6 +18,22 @@ function CourseDetails() {
   const [progress, setProgress] = useState([])
   const [isEnrolled, setIsEnrolled] = useState(false)
   const [activeModule, setActiveModule] = useState(null)
+  const [showPayment, setShowPayment] = useState(false)
+  const [canFinishText, setCanFinishText] = useState(false)
+
+  useEffect(() => {
+    if (activeModule && course?.modules) {
+      const mod = course.modules.find(m => m.id === activeModule);
+      if (mod) {
+        setCanFinishText(false);
+        const delay = mod.content_type?.toLowerCase() === 'text' ? 10000 : 60000;
+        const timer = setTimeout(() => {
+          setCanFinishText(true);
+        }, delay);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [activeModule, course]);
 
   useEffect(() => {
     getCourses()
@@ -92,6 +109,11 @@ function CourseDetails() {
       setUser({ ...user, xp: newXP })
 
       setMessage('Lesson marked as complete! +10 XP Earned! 🏆')
+      
+      // Auto-close the module when finished
+      if (activeModule === mod.id) {
+        setActiveModule(null);
+      }
     } catch (err) {
       console.error(err)
       const backendError = err.response?.data?.error?.message || err.message
@@ -103,6 +125,8 @@ function CourseDetails() {
     const p = progress.find(p => p.module?.id === mod.id || p.module?.documentId === mod.documentId)
     return p?.status || null
   }
+
+  const hasInProgressLesson = course?.modules?.some(mod => getModuleStatus(mod) === 'in_progress');
 
   if (loading) return <Spinner />
   if (!course) return <div className="p-10 text-xl">Course not found!</div>
@@ -134,9 +158,14 @@ function CourseDetails() {
                       if (!isEnrolled || !user) {
                         setMessage("Please enroll in the course to view module content. 🔒")
                       } else if (!status) {
-                        setMessage("You must click 'Start Lesson' to view the content. 🎬")
+                        if (hasInProgressLesson) {
+                          setMessage("⚠️ You must finish your current lesson before starting a new one!")
+                        } else {
+                          setMessage("You must click 'Start Lesson' to view the content. 🎬")
+                        }
                       } else {
-                        setActiveModule(isActive ? null : mod.id)
+                        const isOpening = !isActive;
+                        setActiveModule(isOpening ? mod.id : null)
                       }
                     }}
                   >
@@ -156,10 +185,14 @@ function CourseDetails() {
                           {!status && (
                             <button
                               onClick={() => {
+                                if (hasInProgressLesson) {
+                                  setMessage("⚠️ You must finish your current lesson before starting a new one!");
+                                  return;
+                                }
                                 handleStart(mod);
                                 setActiveModule(mod.id); // Auto open when starting
                               }}
-                              className="btn btn-sm btn-primary"
+                              className={`btn btn-sm ${hasInProgressLesson ? 'bg-base-300 text-base-content/50 cursor-not-allowed border-none' : 'btn-primary'}`}
                             >
                               Start Lesson
                             </button>
@@ -167,9 +200,12 @@ function CourseDetails() {
                           {status === 'in_progress' && (
                             <button
                               onClick={() => handleFinish(mod)}
-                              className="btn btn-sm btn-warning"
+                              disabled={!canFinishText}
+                              className={`btn btn-sm btn-warning ${!canFinishText ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                              Finish Lesson
+                              {!canFinishText 
+                                ? (mod.content_type?.toLowerCase() === 'text' ? 'Keep Reading...' : 'Keep Watching...') 
+                                : 'Finish Lesson'}
                             </button>
                           )}
                           {status === 'completed' && (
@@ -248,7 +284,15 @@ function CourseDetails() {
       )}
 
       {message && (
-        <div className={`alert mb-4 ${message.includes('🎉') || message.includes('✅') ? 'alert-success' : 'alert-error'}`}>
+        <div className={`alert mb-4 ${
+          message.includes('Error') 
+            ? 'alert-error' 
+            : message.includes('🚀')
+              ? 'bg-red-300 text-red-900 border-none'
+            : message.includes('🔒') || message.includes('🎬') || message.includes('⚠️')
+              ? 'alert-warning'
+              : 'alert-success'
+        } shadow-sm animate-in fade-in slide-in-from-top-2`}>
           {message}
         </div>
       )}
@@ -274,13 +318,29 @@ function CourseDetails() {
         ) : (
           <button
             className="btn btn-primary btn-lg w-full mt-4"
-            onClick={handleEnroll}
+            onClick={() => {
+              if (course.price && parseFloat(course.price) > 0) {
+                setShowPayment(true)
+              } else {
+                handleEnroll()
+              }
+            }}
             disabled={enrolling}
           >
             {enrolling ? <span className="loading loading-spinner loading-sm"></span> : 'Enroll Now'}
           </button>
         )
       )}
+
+      <PaymentModal 
+        isOpen={showPayment} 
+        onClose={() => setShowPayment(false)} 
+        onPaymentSuccess={() => {
+          setShowPayment(false);
+          handleEnroll();
+        }}
+        coursePrice={course.price}
+      />
     </div>
   )
 }
