@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
+import YouTube from 'react-youtube'
 import { getCourses, enrollCourse, getProgress, createProgress, updateProgress, getEnrollments, updateUserXP } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
@@ -201,10 +202,10 @@ function CourseDetails() {
                             <button
                               onClick={() => handleFinish(mod)}
                               disabled={!canFinishText}
-                              className={`btn btn-sm btn-warning ${!canFinishText ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              className={`btn btn-sm btn-warning ${!canFinishText ? 'opacity-50 cursor-not-allowed' : ''} ${mod.content_type?.toLowerCase() === 'video' ? 'hidden' : ''}`}
                             >
                               {!canFinishText 
-                                ? (mod.content_type?.toLowerCase() === 'text' ? 'Keep Reading...' : 'Keep Watching...') 
+                                ? 'Keep Reading...'
                                 : 'Finish Lesson'}
                             </button>
                           )}
@@ -237,20 +238,21 @@ function CourseDetails() {
                         
                         // Extract YouTube ID
                         const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-                        const embedUrl = ytMatch ? `https://www.youtube.com/embed/${ytMatch[1]}` : null;
+                        const videoId = ytMatch ? ytMatch[1] : null;
 
-                        return embedUrl ? (
+                        return videoId ? (
                           <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
-                            <iframe 
-                              width="100%" 
-                              height="100%" 
-                              src={embedUrl} 
-                              title="YouTube video player" 
-                              frameBorder="0" 
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                              allowFullScreen
+                            <YouTube 
+                              videoId={videoId} 
+                              opts={{ width: '100%', height: '100%', playerVars: { autoplay: 0 } }}
+                              iframeClassName="w-full h-full"
                               className="w-full h-full"
-                            ></iframe>
+                              onEnd={() => {
+                                if (status === 'in_progress') {
+                                  handleFinish(mod);
+                                }
+                              }}
+                            />
                           </div>
                         ) : (
                           <div className="mb-6 alert alert-warning">
