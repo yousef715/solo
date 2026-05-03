@@ -6,6 +6,28 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess, coursePrice }) {
 
   if (!isOpen) return null;
 
+  const handleCardNumberChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    val = val.replace(/(.{4})/g, '$1 ').trim();
+    e.target.value = val;
+  };
+
+  const handleExpiryChange = (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 2) {
+      val = val.slice(0, 2) + '/' + val.slice(2, 4);
+    }
+    e.target.value = val;
+  };
+
+  const handleCvcChange = (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  };
+
+  const handleNameChange = (e) => {
+    e.target.value = e.target.value.replace(/[^a-zA-Z\u0600-\u06FF\s]/g, ''); // Allows English, Arabic, and spaces
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
@@ -38,6 +60,7 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess, coursePrice }) {
               className="input input-bordered focus:border-primary transition-colors"
               required 
               maxLength="19"
+              onChange={handleCardNumberChange}
             />
           </div>
           
@@ -50,6 +73,7 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess, coursePrice }) {
                 className="input input-bordered focus:border-primary transition-colors" 
                 required 
                 maxLength="5"
+                onChange={handleExpiryChange}
               />
             </div>
             <div className="form-control flex-1">
@@ -60,6 +84,7 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess, coursePrice }) {
                 className="input input-bordered focus:border-primary transition-colors" 
                 required 
                 maxLength="4"
+                onChange={handleCvcChange}
               />
             </div>
           </div>
@@ -71,6 +96,7 @@ function PaymentModal({ isOpen, onClose, onPaymentSuccess, coursePrice }) {
               placeholder="John Doe" 
               className="input input-bordered focus:border-primary transition-colors" 
               required 
+              onChange={handleNameChange}
             />
           </div>
 
