@@ -148,16 +148,21 @@ function CourseDetails() {
             {course.modules.map((mod, index) => {
               const status = getModuleStatus(mod)
               const isActive = activeModule === mod.id
+              const isFirstLesson = index === 0;
+              const prevModStatus = isFirstLesson ? null : getModuleStatus(course.modules[index - 1]);
+              const isLocked = !isFirstLesson && prevModStatus !== 'completed';
 
               return (
-                <div key={mod.id} className="bg-base-200 rounded-xl overflow-hidden shadow-sm">
+                <div key={mod.id} className={`bg-base-200 rounded-xl overflow-hidden shadow-sm ${isLocked ? 'opacity-70' : ''}`}>
                   {/* Module Header / Accordion Toggle */}
                   <div 
-                    className="p-4 flex items-center justify-between cursor-pointer hover:bg-base-300 transition-colors"
+                    className={`p-4 flex items-center justify-between transition-colors ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-base-300'}`}
                     onClick={() => {
                       // Only allow opening if enrolled and started
                       if (!isEnrolled || !user) {
                         setMessage("Please enroll in the course to view module content. 🔒")
+                      } else if (isLocked && !status) {
+                        setMessage("⚠️ You must complete the previous lessons first!")
                       } else if (!status) {
                         if (hasInProgressLesson) {
                           setMessage("⚠️ You must finish your current lesson before starting a new one!")
@@ -171,8 +176,8 @@ function CourseDetails() {
                     }}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${status === 'completed' ? 'bg-success text-success-content' : 'bg-primary text-primary-content'}`}>
-                        {status === 'completed' ? '✓' : index + 1}
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${status === 'completed' ? 'bg-success text-success-content' : (isLocked ? 'bg-base-300 text-base-content/50' : 'bg-primary text-primary-content')}`}>
+                        {status === 'completed' ? '✓' : (isLocked ? '🔒' : index + 1)}
                       </div>
                       <div>
                         <p className="font-medium">{mod.title}</p>
@@ -186,6 +191,10 @@ function CourseDetails() {
                           {!status && (
                             <button
                               onClick={() => {
+                                if (isLocked) {
+                                  setMessage("⚠️ You must complete the previous lessons first!");
+                                  return;
+                                }
                                 if (hasInProgressLesson) {
                                   setMessage("⚠️ You must finish your current lesson before starting a new one!");
                                   return;
@@ -193,9 +202,9 @@ function CourseDetails() {
                                 handleStart(mod);
                                 setActiveModule(mod.id); // Auto open when starting
                               }}
-                              className={`btn btn-sm ${hasInProgressLesson ? 'bg-base-300 text-base-content/50 cursor-not-allowed border-none' : 'btn-primary'}`}
+                              className={`btn btn-sm ${isLocked || hasInProgressLesson ? 'bg-base-300 text-base-content/50 cursor-not-allowed border-none' : 'btn-primary'}`}
                             >
-                              Start Lesson
+                              {isLocked ? 'Locked 🔒' : 'Start Lesson'}
                             </button>
                           )}
                           {status === 'in_progress' && (
