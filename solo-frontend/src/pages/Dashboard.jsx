@@ -5,7 +5,7 @@ import { getEnrollments, getProgress, getCourses, updateUserGoal } from '../api'
 import Spinner from '../components/Spinner'
 
 function Dashboard() {
-  const { user, logout } = useAuth()
+  const { user, setUser, logout } = useAuth()
   const [enrollments, setEnrollments] = useState([])
   const [progress, setProgress] = useState([])
   const [courses, setCourses] = useState([])
@@ -59,8 +59,8 @@ function Dashboard() {
     setSettingGoal(true);
     try {
       await updateUserGoal(user.id, goalInput);
-      // Since user object is from context, we might need a page reload or update context
-      window.location.reload(); 
+      setUser({ ...user, daily_goal: goalInput });
+      setSettingGoal(false);
     } catch (err) {
       console.error('Failed to set goal', err);
       setSettingGoal(false);
