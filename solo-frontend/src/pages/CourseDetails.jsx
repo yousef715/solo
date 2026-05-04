@@ -22,6 +22,7 @@ function CourseDetails() {
   const [activeModule, setActiveModule] = useState(null)
   const [showPayment, setShowPayment] = useState(false)
   const [canFinishText, setCanFinishText] = useState(false)
+  const [allEnrollments, setAllEnrollments] = useState([])
 
   useEffect(() => {
     if (activeModule && course?.modules) {
@@ -53,6 +54,7 @@ function CourseDetails() {
 
       getEnrollments()
         .then(res => {
+          setAllEnrollments(res.data.data)
           const enrolled = res.data.data.some(e => e.course?.documentId === id)
           setIsEnrolled(enrolled)
         })
@@ -129,6 +131,19 @@ function CourseDetails() {
   }
 
   const hasInProgressLesson = course?.modules?.some(mod => getModuleStatus(mod) === 'in_progress');
+
+  const completedCoursesCount = allEnrollments.filter(enrollment => {
+    const c = enrollment.course;
+    if (!c?.modules || c.modules.length === 0) return false;
+    const completedModules = progress.filter(p => 
+      p.status === 'completed' && c.modules.some(m => m.id === p.module?.id || m.documentId === p.module?.documentId)
+    );
+    return completedModules.length === c.modules.length;
+  }).length;
+
+  const isEligibleForDiscount = completedCoursesCount >= 2;
+  const originalPrice = course?.price ? parseFloat(course.price) : 0;
+  const finalPrice = isEligibleForDiscount && originalPrice > 0 ? originalPrice * 0.8 : originalPrice;
 
   if (loading) return <Spinner />
   if (!course) return <div className="p-10 text-xl">Course not found!</div>
@@ -351,19 +366,30 @@ function CourseDetails() {
             </p>
           </div>
         ) : (
-          <button
-            className="btn btn-primary btn-lg w-full mt-4"
-            onClick={() => {
-              if (course.price && parseFloat(course.price) > 0) {
-                setShowPayment(true)
-              } else {
-                handleEnroll()
-              }
-            }}
-            disabled={enrolling}
-          >
-            {enrolling ? <span className="loading loading-spinner loading-sm"></span> : 'Enroll Now'}
-          </button>
+          <div className="mt-4">
+            {isEligibleForDiscount && originalPrice > 0 && (
+              <div className="alert alert-success shadow-sm mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>🎉 You unlocked a 20% Loyalty Discount for completing 2+ courses!</span>
+              </div>
+            )}
+            <button
+              className="btn btn-primary btn-lg w-full"
+              onClick={() => {
+                if (finalPrice > 0) {
+                  setShowPayment(true)
+                } else {
+                  handleEnroll()
+                }
+              }}
+              disabled={enrolling}
+            >
+              {enrolling ? <span className="loading loading-spinner loading-sm"></span> : 
+               finalPrice > 0 ? 
+                 isEligibleForDiscount ? `Enroll Now - $${finalPrice.toFixed(2)} (was $${originalPrice.toFixed(2)})` : `Enroll Now - $${originalPrice.toFixed(2)}`
+                 : 'Enroll Now (Free)'}
+            </button>
+          </div>
         )
       )}
 
@@ -374,7 +400,7 @@ function CourseDetails() {
           setShowPayment(false);
           handleEnroll();
         }}
-        coursePrice={course.price}
+        coursePrice={finalPrice.toFixed(2)}
       />
     </div>
   )
