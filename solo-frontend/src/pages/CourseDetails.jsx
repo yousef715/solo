@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import YouTube from 'react-youtube'
+import QuizComponent from '../components/QuizComponent'
 import { getCourses, enrollCourse, getProgress, createProgress, updateProgress, getEnrollments, updateUserXP } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
@@ -179,9 +180,19 @@ function CourseDetails() {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${status === 'completed' ? 'bg-success text-success-content' : (isLocked ? 'bg-base-300 text-base-content/50' : 'bg-primary text-primary-content')}`}>
                         {status === 'completed' ? '✓' : (isLocked ? '🔒' : index + 1)}
                       </div>
-                      <div>
-                        <p className="font-medium">{mod.title}</p>
-                        <span className="badge badge-sm badge-ghost">{mod.content_type}</span>
+                      <div className="flex flex-col items-start gap-1">
+                        <p className={`font-medium ${status === 'completed' ? 'line-through text-base-content/50' : 'text-lg'}`}>
+                          {mod.title}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className={`badge badge-sm ${mod.content_type?.toLowerCase() === 'quiz' ? 'badge-secondary' : 'badge-ghost'}`}>
+                            {mod.content_type?.toLowerCase() === 'video' && '🎥 Video'}
+                            {mod.content_type?.toLowerCase() === 'text' && '📄 Reading'}
+                            {mod.content_type?.toLowerCase() === 'quiz' && '📝 Quiz'}
+                            {!mod.content_type && '📄 Lesson'}
+                          </span>
+                          <span className="text-xs font-bold text-secondary">{mod.xp_reward || 10} XP</span>
+                        </div>
                       </div>
                     </div>
                     
@@ -211,7 +222,7 @@ function CourseDetails() {
                             <button
                               onClick={() => handleFinish(mod)}
                               disabled={!canFinishText}
-                              className={`btn btn-sm btn-warning ${!canFinishText ? 'opacity-50 cursor-not-allowed' : ''} ${mod.content_type?.toLowerCase() === 'video' ? 'hidden' : ''}`}
+                              className={`btn btn-sm btn-warning ${!canFinishText ? 'opacity-50 cursor-not-allowed' : ''} ${['video', 'quiz'].includes(mod.content_type?.toLowerCase()) ? 'hidden' : ''}`}
                             >
                               {!canFinishText 
                                 ? 'Keep Reading...'
@@ -240,50 +251,63 @@ function CourseDetails() {
                   {/* Expanded Content View */}
                   {isActive && (
                     <div className="p-6 bg-base-100 border-t border-base-300">
-                      {/* Explicit Video Field */}
-                      {mod.video_url && (() => {
-                        // Extract clean URL
-                        let url = mod.video_url.replace(/\[.*?\]\((.*?)\)/, '$1').replace(/<a.*?href="(.*?)".*?>.*?<\/a>/, '$1').replace(/^['"]|['"]$/g, '').trim();
-                        
-                        // Extract YouTube ID
-                        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-                        const videoId = ytMatch ? ytMatch[1] : null;
-
-                        return videoId ? (
-                          <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
-                            <YouTube 
-                              videoId={videoId} 
-                              opts={{ width: '100%', height: '100%', playerVars: { autoplay: 0 } }}
-                              iframeClassName="w-full h-full"
-                              className="w-full h-full"
-                              onEnd={() => {
-                                if (status === 'in_progress') {
-                                  handleFinish(mod);
-                                }
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="mb-6 alert alert-warning">
-                            <span>Unsupported video URL: </span>
-                            <a href={url} target="_blank" rel="noreferrer" className="underline font-bold text-primary">{url}</a>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Rich Text Content */}
-                      {mod.content ? (
-                        <div className="prose prose-sm md:prose-base max-w-none prose-headings:text-primary prose-a:text-primary">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
-                            {mod.content}
-                          </ReactMarkdown>
-                        </div>
+                      {mod.content_type?.toLowerCase() === 'quiz' ? (
+                        <QuizComponent 
+                          quizData={mod.quiz_data} 
+                          onPass={() => {
+                            if (status === 'in_progress') {
+                              handleFinish(mod);
+                            }
+                          }}
+                        />
                       ) : (
-                        !mod.video_url && (
-                          <div className="text-center text-base-content/60 py-4">
-                            No content has been added to this module yet.
-                          </div>
-                        )
+                        <>
+                          {/* Explicit Video Field */}
+                          {mod.video_url && (() => {
+                            // Extract clean URL
+                            let url = mod.video_url.replace(/\[.*?\]\((.*?)\)/, '$1').replace(/<a.*?href="(.*?)".*?>.*?<\/a>/, '$1').replace(/^['"]|['"]$/g, '').trim();
+                            
+                            // Extract YouTube ID
+                            const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+                            const videoId = ytMatch ? ytMatch[1] : null;
+
+                            return videoId ? (
+                              <div className="mb-6 aspect-video w-full rounded-xl overflow-hidden shadow-lg border border-base-300 bg-black">
+                                <YouTube 
+                                  videoId={videoId} 
+                                  opts={{ width: '100%', height: '100%', playerVars: { autoplay: 0 } }}
+                                  iframeClassName="w-full h-full"
+                                  className="w-full h-full"
+                                  onEnd={() => {
+                                    if (status === 'in_progress') {
+                                      handleFinish(mod);
+                                    }
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="mb-6 alert alert-warning">
+                                <span>Unsupported video URL: </span>
+                                <a href={url} target="_blank" rel="noreferrer" className="underline font-bold text-primary">{url}</a>
+                              </div>
+                            );
+                          })()}
+
+                          {/* Rich Text Content */}
+                          {mod.content ? (
+                            <div className="prose prose-sm md:prose-base max-w-none prose-headings:text-primary prose-a:text-primary">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                                {mod.content}
+                              </ReactMarkdown>
+                            </div>
+                          ) : (
+                            !mod.video_url && (
+                              <div className="text-center text-base-content/60 py-4">
+                                No content has been added to this module yet.
+                              </div>
+                            )
+                          )}
+                        </>
                       )}
                     </div>
                   )}

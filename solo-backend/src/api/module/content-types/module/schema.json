@@ -17,7 +17,7 @@
     },
     "content_type": {
       "type": "enumeration",
-      "enum": ["video", "text", "interactive"],
+      "enum": ["video", "text", "quiz", "interactive"],
       "required": true
     },
     "video_url": {
@@ -25,6 +25,9 @@
     },
     "content": {
       "type": "richtext"
+    },
+    "quiz_data": {
+      "type": "json"
     },
     "course": {
       "type": "relation",
