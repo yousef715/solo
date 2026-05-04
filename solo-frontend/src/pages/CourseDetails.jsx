@@ -5,6 +5,7 @@ import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import YouTube from 'react-youtube'
 import QuizComponent from '../components/QuizComponent'
+import CommentsSection from '../components/CommentsSection'
 import { getCourses, enrollCourse, getProgress, createProgress, updateProgress, getEnrollments, updateUserXP } from '../api'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
@@ -325,6 +326,15 @@ function CourseDetails() {
                             )
                           )}
                         </>
+                      )}
+
+                      {/* Discussion & Q&A Section */}
+                      {user && isEnrolled ? (
+                        <CommentsSection moduleId={mod.documentId || mod.id} />
+                      ) : (
+                        <div className="mt-8 border-t border-base-300 pt-6">
+                           <div className="alert bg-base-200">Please enroll to view discussions and ask questions. 🔒</div>
+                        </div>
                       )}
                     </div>
                   )}

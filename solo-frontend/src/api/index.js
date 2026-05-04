@@ -2,6 +2,7 @@ import axios from 'axios'
 
 const API = axios.create({
   baseURL: 'https://solo-production-eb9d.up.railway.app/api',
+  // baseURL: 'http://localhost:1337/api',
 })
 
 API.interceptors.request.use((config) => {
@@ -33,3 +34,7 @@ export const enrollCourse = (courseDocumentId) =>
 export const getProgress = (userId) => API.get(`/progress-trackings?filters[user][id][$eq]=${userId}&populate=module`)
 export const createProgress = (data) => API.post('/progress-trackings', { data })
 export const updateProgress = (id, data) => API.put(`/progress-trackings/${id}`, { data })
+
+// Comments
+export const getComments = (moduleId) => API.get(`/comments?filters[module][id][$eq]=${moduleId}&populate=user&sort=createdAt:asc`)
+export const createComment = (data) => API.post('/comments', { data })

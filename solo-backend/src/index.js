@@ -29,6 +29,35 @@ module.exports = {
         }
       });
       console.log('Ghost courses and modules deleted!');
+
+      // Grant permissions for comments to the authenticated role
+      const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
+        where: { type: 'authenticated' },
+      });
+
+      if (authenticatedRole) {
+        const permissions = ['find', 'create'];
+        for (const action of permissions) {
+          const actionString = `api::comment.comment.${action}`;
+          
+          const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
+            where: {
+              action: actionString,
+              role: authenticatedRole.id,
+            },
+          });
+
+          if (!existingPermission) {
+            await strapi.db.query('plugin::users-permissions.permission').create({
+              data: {
+                action: actionString,
+                role: authenticatedRole.id,
+              },
+            });
+            console.log(`Granted ${actionString} to authenticated role`);
+          }
+        }
+      }
     } catch (err) {
       console.error('Failed to delete ghost courses:', err);
     }
