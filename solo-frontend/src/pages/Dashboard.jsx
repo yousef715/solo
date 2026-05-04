@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getEnrollments, getProgress, getCourses } from '../api'
+import { getEnrollments, getProgress, getCourses, updateUserGoal } from '../api'
 import Spinner from '../components/Spinner'
 
 function Dashboard() {
@@ -10,6 +10,8 @@ function Dashboard() {
   const [progress, setProgress] = useState([])
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
+  const [settingGoal, setSettingGoal] = useState(false)
+  const [goalInput, setGoalInput] = useState(0)
 
   useEffect(() => {
     if (!user?.id) return;
@@ -21,7 +23,11 @@ function Dashboard() {
       })
       .catch(err => console.error(err))
       .finally(() => setLoading(false))
-  }, [])
+      
+    if (user?.daily_goal) {
+      setGoalInput(user.daily_goal)
+    }
+  }, [user])
 
   const completed = progress.filter(p => p.status === 'completed').length
   const inProgress = progress.filter(p => p.status === 'in_progress').length
@@ -35,8 +41,31 @@ function Dashboard() {
     return completedModules.length === course.modules.length;
   }
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const completedToday = progress.filter(p => {
+    if (p.status !== 'completed') return false;
+    const updatedAt = new Date(p.updatedAt);
+    return updatedAt >= today;
+  }).length;
 
+  const currentGoal = user?.daily_goal || 0;
+  const isGoalSet = currentGoal > 0;
+  const isGoalReached = isGoalSet && completedToday >= currentGoal;
+  const goalProgress = isGoalSet ? Math.min((completedToday / currentGoal) * 100, 100) : 0;
 
+  async function handleSetGoal() {
+    if (!goalInput || goalInput <= 0) return;
+    setSettingGoal(true);
+    try {
+      await updateUserGoal(user.id, goalInput);
+      // Since user object is from context, we might need a page reload or update context
+      window.location.reload(); 
+    } catch (err) {
+      console.error('Failed to set goal', err);
+      setSettingGoal(false);
+    }
+  }
   if (loading) return <Spinner />
 
   return (
@@ -48,6 +77,78 @@ function Dashboard() {
           <p className="text-base-content/60 mt-1">Here's your learning overview</p>
         </div>
         <button onClick={logout} className="btn btn-outline btn-error btn-sm">Logout</button>
+      </div>
+
+      {/* Daily Goal Tracker */}
+      <div className="mb-10 bg-base-200 rounded-2xl p-6 shadow-sm border border-base-300">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <div>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              🎯 Daily Goal
+            </h2>
+            <p className="text-base-content/60 text-sm">
+              {isGoalSet ? "Track your daily learning progress." : "Set a daily goal to build a learning habit!"}
+            </p>
+          </div>
+          
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-medium">Goal:</span>
+            <input 
+              type="number" 
+              className="input input-bordered input-sm w-20" 
+              value={goalInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                setGoalInput(val === '' ? '' : parseInt(val));
+              }}
+              min="0"
+            />
+            <span className="text-sm">lessons</span>
+            {goalInput !== currentGoal && (
+              <button 
+                className="btn btn-primary btn-sm ml-2" 
+                onClick={handleSetGoal}
+                disabled={settingGoal}
+              >
+                {settingGoal ? <span className="loading loading-spinner loading-xs"></span> : 'Save'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {isGoalSet && (
+          <div className="mt-4">
+            <div className="flex justify-between items-end mb-2">
+              <span className="font-bold text-lg">
+                {completedToday} / {currentGoal}
+                <span className="text-sm text-base-content/60 ml-2 font-normal">lessons today</span>
+              </span>
+              <span className="text-sm font-medium text-primary">{Math.round(goalProgress)}%</span>
+            </div>
+            <progress 
+              className={`progress w-full h-3 ${isGoalReached ? 'progress-success' : 'progress-primary'}`} 
+              value={completedToday} 
+              max={currentGoal}
+            ></progress>
+            
+            {/* Motivational Message */}
+            <div className="mt-3 text-sm font-medium">
+              {isGoalReached ? (
+                <span className="text-success flex items-center gap-1">
+                  🎉 Amazing! You've reached your daily goal. Take a break or keep crushing it!
+                </span>
+              ) : completedToday > 0 ? (
+                <span className="text-warning">
+                  🔥 You're on fire! Only {currentGoal - completedToday} more to go.
+                </span>
+              ) : (
+                <span className="text-base-content/60">
+                  Ready to start? Pick a course and finish your first lesson today!
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats */}

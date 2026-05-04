@@ -32,5 +32,23 @@ module.exports = {
     } catch (err) {
       ctx.throw(500, err);
     }
+  },
+
+  async updateGoal(ctx) {
+    try {
+      const { userId, goal } = ctx.request.body;
+      if (!userId) {
+        return ctx.badRequest('userId is required');
+      }
+
+      const updatedUser = await strapi.db.query('plugin::users-permissions.user').update({
+        where: { id: userId },
+        data: { daily_goal: goal }
+      });
+      
+      return updatedUser;
+    } catch (err) {
+      ctx.throw(500, err);
+    }
   }
 };

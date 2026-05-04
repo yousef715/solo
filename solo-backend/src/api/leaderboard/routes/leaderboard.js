@@ -15,6 +15,14 @@ module.exports = {
       config: {
         auth: false
       }
+    },
+    {
+      method: 'POST',
+      path: '/user/goal',
+      handler: 'leaderboard.updateGoal',
+      config: {
+        auth: false
+      }
     }
   ]
 };

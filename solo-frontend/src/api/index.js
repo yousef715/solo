@@ -17,6 +17,7 @@ API.interceptors.request.use((config) => {
 export const registerUser = (data) => API.post('/auth/local/register', data)
 export const loginUser = (data) => API.post('/auth/local', data)
 export const updateUserXP = (id, xp) => API.post(`/leaderboard/xp`, { userId: id, xp })
+export const updateUserGoal = (id, goal) => API.post(`/user/goal`, { userId: id, goal })
 export const getLeaderboard = () => API.get('/leaderboard')
 
 // Courses

@@ -516,7 +516,7 @@ export interface ApiModuleModule extends Struct.CollectionTypeSchema {
   attributes: {
     content: Schema.Attribute.RichText;
     content_type: Schema.Attribute.Enumeration<
-      ['video', 'text', 'interactive']
+      ['video', 'text', 'quiz', 'interactive']
     > &
       Schema.Attribute.Required;
     course: Schema.Attribute.Relation<'manyToOne', 'api::course.course'>;
@@ -530,6 +530,7 @@ export interface ApiModuleModule extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    quiz_data: Schema.Attribute.JSON;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1039,6 +1040,7 @@ export interface PluginUsersPermissionsUser
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    daily_goal: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{

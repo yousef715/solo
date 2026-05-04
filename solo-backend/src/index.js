@@ -6,6 +6,10 @@ module.exports = {
       type: 'integer',
       default: 0,
     };
+    strapi.contentType('plugin::users-permissions.user').attributes.daily_goal = {
+      type: 'integer',
+      default: 0,
+    };
   },
 
   async bootstrap({ strapi }) {
