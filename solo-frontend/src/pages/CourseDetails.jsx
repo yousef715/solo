@@ -23,6 +23,7 @@ function CourseDetails() {
   const [showPayment, setShowPayment] = useState(false)
   const [canFinishText, setCanFinishText] = useState(false)
   const [allEnrollments, setAllEnrollments] = useState([])
+  const [allCourses, setAllCourses] = useState([])
 
   useEffect(() => {
     if (activeModule && course?.modules) {
@@ -41,6 +42,7 @@ function CourseDetails() {
   useEffect(() => {
     getCourses()
       .then(res => {
+        setAllCourses(res.data.data)
         const found = res.data.data.find(c => c.documentId === id)
         setCourse(found)
       })
@@ -133,7 +135,7 @@ function CourseDetails() {
   const hasInProgressLesson = course?.modules?.some(mod => getModuleStatus(mod) === 'in_progress');
 
   const completedCoursesCount = allEnrollments.filter(enrollment => {
-    const c = enrollment.course;
+    const c = allCourses.find(course => course.id === enrollment.course?.id || course.documentId === enrollment.course?.documentId);
     if (!c?.modules || c.modules.length === 0) return false;
     const completedModules = progress.filter(p => 
       p.status === 'completed' && c.modules.some(m => m.id === p.module?.id || m.documentId === p.module?.documentId)
