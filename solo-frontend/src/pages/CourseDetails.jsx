@@ -112,8 +112,8 @@ function CourseDetails() {
 
       setMessage('Lesson marked as complete! +10 XP Earned! 🏆')
       
-      // Auto-close the module when finished
-      if (activeModule === mod.id) {
+      // Auto-close the module when finished (unless it's a quiz, so they can see their score)
+      if (activeModule === mod.id && mod.content_type?.toLowerCase() !== 'quiz') {
         setActiveModule(null);
       }
     } catch (err) {
@@ -215,7 +215,7 @@ function CourseDetails() {
                               }}
                               className={`btn btn-sm ${isLocked || hasInProgressLesson ? 'bg-base-300 text-base-content/50 cursor-not-allowed border-none' : 'btn-primary'}`}
                             >
-                              {isLocked ? 'Locked 🔒' : 'Start Lesson'}
+                              {isLocked ? 'Locked 🔒' : (mod.content_type?.toLowerCase() === 'quiz' ? 'Start Quiz' : 'Start Lesson')}
                             </button>
                           )}
                           {status === 'in_progress' && (
