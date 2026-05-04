@@ -1,184 +1,247 @@
- Solo — Empowering the Independent Learner
+ # Solo — Online Learning Platform 🎓
 
-Department:Mathematical Statistics and Computer Science
+> An interactive e-learning platform where students can browse, enroll, and complete courses — earning XP points, certificates, and competing on a leaderboard.
 
-## Team Members:
-
-- Yousef Morse Mohamed
-- Mohamed Walid Sayed
-- Girgis Essam Fayez
-
-Supervisor: Dr. Hussein Karam
-
-==================================================================================================================================================================
-
- ## Project Overview
-
-Solo is a full-stack e-learning platform that empowers independent learners by
-providing a diverse range of expert-led courses. The platform allows students to
-browse courses, enroll, and track their learning progress — all in one place.
-
-==================================================================================================================================================================
-
- Tech Stack
-
-| Layer    | Technology                            |
-----------------------------------------------------
-| Frontend | React 19, Vite, Tailwind CSS, DaisyUI |
-----------------------------------------------------
-| Backend  | Strapi v5 (Node.js)                   |
-----------------------------------------------------
-| Database | PostgreSQL                            |
-----------------------------------------------------
-| API      | REST API with JWT Authentication      |
-----------------------------------------------------
-
-
-
-## Project Structure
-==================================================================================================================================================================
-
-
-```
-solo/
-├── solo-frontend/         # React frontend application
-│   ├── src/
-│   │   ├── api/           # Axios API calls
-│   │   ├── components/    # Reusable components (Navbar, Spinner, ProtectedRoute)
-│   │   ├── context/       # Auth Context
-│   │   └── pages/         # Application pages
-├── solo-backend/          # Strapi backend application
-│   ├── src/
-│   │   └── api/           # API controllers, routes, services
-│   │       ├── course/
-│   │       ├── enrollment/
-│   │       ├── module/
-│   │       └── progress-tracking/
-│   └── config/            # Strapi configuration
-└── Database/             # Database export file
-```
+🔗 **Live Demo:** [solo-eight-umber.vercel.app](https://solo-eight-umber.vercel.app)
 
 ---
-==================================================================================================================================================================
+
+## 📌 Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [System Architecture](#system-architecture)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+- [Team](#team)
+
+---
+
+## Overview
+
+**Solo** is a full-stack web application that allows users to:
+- Browse and enroll in courses
+- Watch video lessons and read text-based content
+- Take quizzes to test their knowledge
+- Track their learning progress module by module
+- Earn XP points and certificates upon course completion
+- Compete with other learners on a global leaderboard
+
+---
 
 ## Features
 
-- User Registration & Login with JWT Authentication
-- Browse and Search Courses by category
-- Course Details with Modules
-- Enroll in Courses
-- Track Progress per Module (Mark as Complete)
-- Personal Dashboard with enrollment stats
-- Role-Based Access Control (Student / Expert)
-- Protected Routes
+| Feature | Description |
+|--------|-------------|
+| 🔐 Authentication | Register, login, and protected routes via JWT |
+| 📚 Course Catalog | Browse all available courses with categories and pricing |
+| 🎥 Course Player | Watch YouTube videos and read markdown content per module |
+| ✅ Progress Tracking | Mark modules as complete and track overall course progress |
+| 🧠 Quiz System | Interactive quizzes with auto-close and result feedback |
+| 💳 Payment Modal | Payment flow before enrolling in paid courses |
+| 🏆 Leaderboard | Live XP-based ranking of all students |
+| 🎓 Certificates | Auto-generated PDF certificates upon course completion |
+| 📊 Dashboard | Personal learning stats: XP, enrolled courses, completed lessons |
 
-==================================================================================================================================================================
+---
 
+## Tech Stack
 
-## Prerequisites
+### Frontend
+| Technology | Purpose |
+|-----------|---------|
+| React 19 | UI framework |
+| Vite | Build tool |
+| Tailwind CSS + DaisyUI | Styling |
+| React Router DOM v7 | Client-side routing |
+| Axios | HTTP requests |
+| React YouTube | Video player |
+| React Markdown | Markdown rendering |
+| jsPDF + html2canvas | Certificate PDF generation |
+| Formik + Yup | Form handling and validation |
 
-Make sure you have the following installed:
+### Backend
+| Technology | Purpose |
+|-----------|---------|
+| Strapi v5 | Headless CMS & REST API |
+| Node.js ≥ 20 | Runtime |
+| PostgreSQL | Production database |
+| SQLite | Local development database |
 
-- Node.js v18 or higher
-- PostgreSQL
-- npm
+---
 
-==================================================================================================================================================================
+## System Architecture
 
+```
+┌─────────────────────────────────────────┐
+│              Solo Platform              │
+├─────────────────┬───────────────────────┤
+│   Frontend      │      Backend          │
+│   (React/Vite)  │      (Strapi v5)      │
+│                 │                       │
+│  /courses       │  /api/courses         │
+│  /dashboard     │  /api/enrollments     │
+│  /leaderboard   │  /api/progress-       │
+│  /certificate   │        trackings      │
+│                 │  /api/leaderboard     │
+│                 │  /api/modules         │
+│                 │                       │
+│  Deployed on:   │  Database:            │
+│  Vercel         │  PostgreSQL           │
+└─────────────────┴───────────────────────┘
+```
 
-## Setup Instructions
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js >= 20.x
+- npm >= 6.x
+- PostgreSQL (for production) or SQLite (for local dev)
+
+---
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yousef715/solo1.git
+git clone https://github.com/yousef715/solo.git
 cd solo
 ```
 
-### 2. Setup the Database
+---
 
-- Open **pgAdmin** and create a new database named `solo_db`
-- Import the database export file:
+### 2. Setup Backend (Strapi)
 
 ```bash
 cd solo-backend
 npm install
-npx strapi import -f "../Database/export_20260430151032.tar.gz"
 ```
 
-### 3. Setup the Backend
+Create a `.env` file in `solo-backend/` (see [Environment Variables](#environment-variables) section).
 
 ```bash
-cd solo-backend
+# Start in development mode
+npm run dev
 ```
 
-Create a `.env` file with the following:
+Backend runs at: `http://localhost:1337`
 
-```env
-HOST=0.0.0.0
-PORT=1337
-APP_KEYS=your_app_keys
-API_TOKEN_SALT=your_api_token_salt
-ADMIN_JWT_SECRET=your_admin_jwt_secret
-TRANSFER_TOKEN_SALT=your_transfer_token_salt
-JWT_SECRET=your_jwt_secret
+---
 
-DATABASE_CLIENT=postgres
-DATABASE_HOST=127.0.0.1
-DATABASE_PORT=5432
-DATABASE_NAME=solo_db
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=your_password
-DATABASE_SSL=false
-```
-
-Run the backend:
-
-```bash
-npm run develop
-```
-
-The backend will be available at `http://localhost:1337`
-
-### 4. Setup the Frontend
+### 3. Setup Frontend (React)
 
 ```bash
 cd solo-frontend
 npm install
+```
+
+Create a `.env` file in `solo-frontend/` with:
+
+```env
+VITE_API_URL=http://localhost:1337
+```
+
+```bash
+# Start development server
 npm run dev
 ```
 
-The frontend will be available at `http://localhost:5173`
-
-==================================================================================================================================================================
-
-## API Endpoints
-
-| Method |            Endpoint           |      Description       |
-|--------|-------------------------------|------------------------|
-| POST   | `/api/auth/local/register`    | Register new user      |
-| POST   | `/api/auth/local`             | Login                  |
-| GET    | `/api/courses?populate=*`     | Get all courses        |
-| GET    | `/api/enrollments`            | Get user enrollments   |
-| POST   | `/api/enrollments`            | Enroll in a course     |
-| GET    | `/api/progress-trackings`     | Get user progress      |
-| POST   | `/api/progress-trackings`     | Create progress record |
-| PUT    | `/api/progress-trackings/:id` | Update progress        |
-
-==================================================================================================================================================================
-
-## Database Schema
-
-|       Table       |            Description                 |
-|-------------------|----------------------------------------|
-| Users             | Stores user credentials and roles      |
-| Courses           | Course information and metadata        |
-| Modules           | Learning blocks linked to courses      |
-| Enrollments       | Many-to-many between users and courses |
-| Progress_Tracking | Tracks module completion per user      |
+Frontend runs at: `http://localhost:5173`
 
 ---
 
-## GitHub Repository
+## Project Structure
 
-https://github.com/yousef715/solo
+```
+solo/
+├── solo-frontend/               # React + Vite frontend
+│   ├── src/
+│   │   ├── api/                 # Axios API calls
+│   │   ├── components/          # Reusable UI components
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── QuizComponent.jsx
+│   │   │   ├── Certificate.jsx
+│   │   │   ├── PaymentModal.jsx
+│   │   │   └── ProtectedRoute.jsx
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx  # Global auth state
+│   │   └── pages/
+│   │       ├── Home.jsx
+│   │       ├── Courses.jsx
+│   │       ├── CourseDetails.jsx
+│   │       ├── Dashboard.jsx
+│   │       ├── Leaderboard.jsx
+│   │       ├── CertificateView.jsx
+│   │       ├── Login.jsx
+│   │       └── Register.jsx
+│   └── public/
+│
+├── solo-backend/                # Strapi v5 backend
+│   ├── src/
+│   │   └── api/
+│   │       ├── course/          # Course content type
+│   │       ├── module/          # Module content type
+│   │       ├── enrollment/      # Enrollment content type
+│   │       ├── progress-tracking/  # Progress content type
+│   │       └── leaderboard/     # Leaderboard controller
+│   └── config/
+│       ├── database.js
+│       ├── server.js
+│       └── middlewares.js
+│
+└── Database/                    # DB export/backup files
+```
+
+---
+
+## Environment Variables
+
+### Backend (`solo-backend/.env`)
+
+```env
+HOST=0.0.0.0
+PORT=1337
+APP_KEYS=your_app_keys_here
+API_TOKEN_SALT=your_token_salt
+ADMIN_JWT_SECRET=your_admin_jwt_secret
+TRANSFER_TOKEN_SALT=your_transfer_token_salt
+JWT_SECRET=your_jwt_secret
+
+# Database (PostgreSQL for production)
+DATABASE_CLIENT=postgres
+DATABASE_URL=your_postgresql_connection_string
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=solo
+DATABASE_USERNAME=your_db_user
+DATABASE_PASSWORD=your_db_password
+DATABASE_SSL=false
+```
+
+### Frontend (`solo-frontend/.env`)
+
+```env
+VITE_API_URL=http://localhost:1337
+```
+
+---
+
+## Team
+
+| Name | Department |
+|------|-----------|
+| Yousef Morse Mohamed | Mathematical Statistics & Computer Science |
+| Mohamed Walid Sayed | Mathematical Statistics & Computer Science |
+| Girgis Essam Fayez | Mathematical Statistics & Computer Science |
+
+**Supervisor:** Dr. Hussein Karam
+
+---
+
+
+
+
+
