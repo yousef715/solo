@@ -114,12 +114,20 @@ function CommentsSection({ moduleId }) {
 
   return (
     <div className="mt-8 border-t border-base-300 pt-6">
-      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-        </svg>
-        Discussion & Q&A
-      </h3>
+      <div className="collapse collapse-arrow bg-base-200/30 border border-base-300 rounded-2xl">
+        <input type="checkbox" defaultChecked /> 
+        <div className="collapse-title p-4">
+          <h3 className="text-xl font-bold flex items-center gap-2 m-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+            </svg>
+            Discussion & Q&A
+            <span className="badge badge-primary badge-sm ml-2">{comments.length}</span>
+          </h3>
+        </div>
+        
+        <div className="collapse-content px-4 pb-4">
+          <div className="divider mt-0 mb-4"></div>
 
       <div className="flex flex-col gap-4 mb-6">
         {topLevelComments.length === 0 ? (
@@ -234,6 +242,8 @@ function CommentsSection({ moduleId }) {
           <p>Please <a href="/login" className="link link-primary font-bold">log in</a> to participate in the discussion.</p>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }
