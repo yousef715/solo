@@ -41,21 +41,28 @@ module.exports = {
           const actionString = `api::comment.comment.${action}`;
           
           const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
-            where: {
-              action: actionString,
-              role: authenticatedRole.id,
-            },
+            where: { action: actionString, role: authenticatedRole.id },
           });
 
           if (!existingPermission) {
             await strapi.db.query('plugin::users-permissions.permission').create({
-              data: {
-                action: actionString,
-                role: authenticatedRole.id,
-              },
+              data: { action: actionString, role: authenticatedRole.id },
             });
-            console.log(`Granted ${actionString} to authenticated role`);
           }
+        }
+      }
+
+      // DEBUG: Grant find to public role
+      const publicRole = await strapi.db.query('plugin::users-permissions.role').findOne({ where: { type: 'public' } });
+      if (publicRole) {
+        const actionString = `api::comment.comment.find`;
+        const existingPermission = await strapi.db.query('plugin::users-permissions.permission').findOne({
+          where: { action: actionString, role: publicRole.id },
+        });
+        if (!existingPermission) {
+          await strapi.db.query('plugin::users-permissions.permission').create({
+            data: { action: actionString, role: publicRole.id },
+          });
         }
       }
     } catch (err) {
