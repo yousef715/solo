@@ -18,8 +18,7 @@
     "user": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "comments"
+      "target": "plugin::users-permissions.user"
     },
     "module": {
       "type": "relation",
