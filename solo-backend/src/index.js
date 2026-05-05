@@ -66,25 +66,26 @@ module.exports = {
         }
       }
 
-      // Seed the requested course
+      // Seed the requested course properly for Strapi v5 (so it shows in Admin panel)
       const courseTitle = 'Introduction to Programming';
-      const existingCourse = await strapi.db.query('api::course.course').findOne({
+      
+      // Delete any improperly seeded ones first
+      await strapi.db.query('api::course.course').deleteMany({
         where: { title: courseTitle },
       });
 
-      if (!existingCourse) {
-        await strapi.db.query('api::course.course').create({
-          data: {
-            title: courseTitle,
-            description: 'A beginner-friendly free course covering the fundamentals of programming logic and problem solving',
-            category: 'Software Engineering',
-            instructorName: 'Hussein Karam',
-            price: 0,
-            publishedAt: new Date(),
-          },
-        });
-        console.log(`Seeded course: ${courseTitle}`);
-      }
+      // Create using Document API to generate both Draft & Published states
+      await strapi.documents('api::course.course').create({
+        data: {
+          title: courseTitle,
+          description: 'A beginner-friendly free course covering the fundamentals of programming logic and problem solving',
+          category: 'Software Engineering',
+          instructorName: 'Hussein Karam',
+          price: 0,
+        },
+        status: 'published',
+      });
+      console.log(`Seeded course properly: ${courseTitle}`);
 
     } catch (err) {
       console.error('Failed to delete ghost courses:', err);
