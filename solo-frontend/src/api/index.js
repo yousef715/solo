@@ -36,5 +36,5 @@ export const createProgress = (data) => API.post('/progress-trackings', { data }
 export const updateProgress = (id, data) => API.put(`/progress-trackings/${id}`, { data })
 
 // Comments
-export const getComments = (moduleId) => API.get(`/comments?filters[module][id][$eq]=${moduleId}&populate=user,parent&sort=createdAt:asc`)
+export const getComments = (moduleId) => API.get(`/comments?filters[module][id][$eq]=${moduleId}&populate[0]=user&populate[1]=parent&sort=createdAt:asc`)
 export const createComment = (data) => API.post('/comments', { data })
