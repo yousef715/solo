@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 function Login() {
@@ -9,6 +9,8 @@ function Login() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isConfirmed = new URLSearchParams(location.search).get('confirmed') === 'true'
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -29,6 +31,7 @@ function Login() {
       <div className="card bg-base-200 w-full max-w-md shadow-lg">
         <div className="card-body">
           <h2 className="card-title text-2xl mb-4">Login</h2>
+          {isConfirmed && <div className="alert alert-success text-sm mb-4">Email confirmed successfully! You can now log in.</div>}
           {error && <div className="alert alert-error text-sm">{error}</div>}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <input

@@ -1,8 +1,7 @@
 import axios from 'axios'
 
 const API = axios.create({
-  baseURL: 'https://solo-production-eb9d.up.railway.app/api',
-  // baseURL: 'http://localhost:1337/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://solo-production-eb9d.up.railway.app/api',
 })
 
 API.interceptors.request.use((config) => {

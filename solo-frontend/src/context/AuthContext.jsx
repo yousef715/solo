@@ -30,8 +30,11 @@ export function AuthProvider({ children }) {
 
   async function register(username, email, password) {
     const res = await registerUser({ username, email, password })
-    setUser(res.data.user)
-    localStorage.setItem('jwt', res.data.jwt)
+    if (res.data.jwt) {
+      setUser(res.data.user)
+      localStorage.setItem('jwt', res.data.jwt)
+    }
+    return res.data;
   }
 
   function logout() {
