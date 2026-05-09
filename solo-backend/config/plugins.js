@@ -12,8 +12,8 @@ module.exports = ({ env }) => ({
         },
       },
       settings: {
-        defaultFrom: 'no-reply@solo-learning.com',
-        defaultReplyTo: 'no-reply@solo-learning.com',
+        defaultFrom: env('SMTP_USERNAME', 'no-reply@solo-learning.com'),
+        defaultReplyTo: env('SMTP_USERNAME', 'no-reply@solo-learning.com'),
       },
     },
   },
