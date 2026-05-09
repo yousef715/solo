@@ -10,6 +10,7 @@ module.exports = {
         host: process.env.SMTP_HOST,
         port: port,
         secure: port === 465,
+        family: 4,
         auth: {
           user: process.env.SMTP_USERNAME,
           pass: process.env.SMTP_PASSWORD,
