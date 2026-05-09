@@ -30,6 +30,29 @@ module.exports = {
       });
       console.log('Ghost courses and modules deleted!');
 
+      // Enable email confirmation automatically
+      try {
+        const pluginStore = strapi.store({
+          environment: '',
+          type: 'plugin',
+          name: 'users-permissions',
+        });
+        
+        const advanced = await pluginStore.get({ key: 'advanced' });
+        
+        if (advanced) {
+          advanced.email_confirmation = true;
+          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+          advanced.email_confirmation_redirection = `${frontendUrl}/login?confirmed=true`;
+          await pluginStore.set({ key: 'advanced', value: advanced });
+          console.log('Email confirmation is now forcibly enabled. Advanced settings:', advanced);
+        } else {
+          console.log('Advanced settings not found!');
+        }
+      } catch (error) {
+        console.error('Failed to configure email confirmation:', error);
+      }
+
       // Grant permissions for comments to the authenticated role
       const authenticatedRole = await strapi.db.query('plugin::users-permissions.role').findOne({
         where: { type: 'authenticated' },
