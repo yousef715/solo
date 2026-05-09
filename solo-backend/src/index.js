@@ -41,11 +41,10 @@ module.exports = {
         const advanced = await pluginStore.get({ key: 'advanced' });
         
         if (advanced) {
-          advanced.email_confirmation = true;
-          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-          advanced.email_confirmation_redirection = `${frontendUrl}/login?confirmed=true`;
+          advanced.email_confirmation = false;
+          advanced.email_confirmation_redirection = ``;
           await pluginStore.set({ key: 'advanced', value: advanced });
-          console.log('Email confirmation is now forcibly enabled. Advanced settings:', advanced);
+          console.log('Email confirmation is now forcibly disabled to bypass Railway blocked ports.');
         } else {
           console.log('Advanced settings not found!');
         }
